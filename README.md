@@ -1,13 +1,18 @@
-# rinkaku
+# 輪郭
 
-## 概要
-自分の内面や他者から見た印象を整理し、自分の輪郭を見つけるためのWebアプリです。
+他者の視点や日々の問いを通して、自分自身の輪郭を見つめ直す自己探求アプリです。
 
 ## 使用技術
-- HTML
-- CSS
-- JavaScript
-- GitHub Pages
 
-## 公開URL
-ここにGitHub PagesのURLを貼る
+- HTML
+- Tailwind CSS
+- JavaScript
+- Gemini API（設計上）
+
+## 特徴
+
+- 今日の問いへの回答
+- AIによる輪郭カード生成
+- 他者からの観察機能
+- 気づきライブラリ
+- 内省エッセイ生成
