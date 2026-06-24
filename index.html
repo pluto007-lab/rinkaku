@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>輪郭 - 自分では見えない自分を発見する場所</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Noto Serif JP & Noto Sans JP) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #ECEBE8; /* わずかに濃くした温かみのある外側背景。アプリ枠が引き締まります */
+            color: #262626; /* 柔らかくかつ視認性の高い墨黒 */
+            -webkit-tap-highlight-color: transparent;
+        }
+        .serif {
+            font-family: 'Noto Serif JP', serif;
+        }
+        /* スムーズなスクロールと余白の演出 */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* ページ切り替えのフェードイン */
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* 問いの切り替え用アニメーションクラス */
+        .fade-out-question {
+            animation: fadeOutQ 0.3s ease forwards;
+        }
+        .fade-in-question {
+            animation: fadeInQ 0.4s ease forwards;
+        }
+        @keyframes fadeOutQ {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.98); }
+        }
+        @keyframes fadeInQ {
+            from { opacity: 0; transform: scale(1.02); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        /* カードの微妙な不揃い感を出すための傾き */
+        .tilt-1 { transform: rotate(-1deg) translateY(2px); }
+        .tilt-2 { transform: rotate(1.5deg) translateY(-2px); }
+        .tilt-3 { transform: rotate(-0.8deg) translateY(1px); }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen p-0 sm:p-4">
+
+    <!-- iPhoneサイズのコンテナ。台紙のベージュグレーに対して、すっきりと美しい陰影で自立させます -->
+    <div id="app-container" class="w-full max-w-[430px] min-h-screen sm:min-h-[850px] sm:max-h-[900px] sm:rounded-[40px] sm:border-[8px] sm:border-neutral-850 bg-[#FAF9F5] shadow-2xl flex flex-col justify-between relative overflow-hidden transition-all duration-300">
+        
+        <!-- ================= HEADER ================= -->
+        <header class="px-6 pt-8 pb-4 flex justify-between items-center z-10 bg-[#FAF9F5]/90 backdrop-blur-md sticky top-0 min-h-[76px]">
+            <div class="flex items-center">
+                <!-- 戻るボタン：不要な時はhiddenになり隙間を完全に埋める -->
+                <button id="back-btn" class="text-neutral-500 hover:text-neutral-900 transition-colors mr-3 hidden" onclick="goBack()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                    </svg>
+                </button>
+                
+                <!-- ブランドロゴ：キャッチコピーを含めて上品かつはっきりとコントラスト化 -->
+                <div id="header-logo" class="flex flex-col transition-all duration-300 select-none">
+                    <div class="serif text-[22px] text-neutral-900 font-medium tracking-widest leading-none">輪郭</div>
+                    <div class="text-[9px] text-neutral-500 font-light tracking-widest mt-1.5 whitespace-nowrap">人は他人の気づきを借りて、自分の輪郭を知る。</div>
+                </div>
+                
+                <!-- 画面タイトル：ホーム以外の時に上品に表示 -->
+                <div id="header-title" class="serif text-[15px] text-neutral-800 font-semibold tracking-widest hidden transition-all duration-300"></div>
+            </div>
+            
+            <div class="flex items-center">
+                <!-- 右上の「…」 -->
+                <button id="nav-settings-top" class="text-neutral-500 hover:text-neutral-900 transition-colors p-1" onclick="switchView('settings')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM6.75 12" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- ================= MAIN CONTENT AREA ================= -->
+        <main class="flex-1 overflow-y-auto hide-scrollbar px-6 pb-12">
+            
+            <!-- 1. HOME VIEW (完璧なあの配置を100%再現) -->
+            <div id="view-home" class="view fade-in space-y-8">
+                <!-- 日付 -->
+                <div class="text-xs tracking-widest text-neutral-500 font-medium mb-1" id="home-date">2026.06.19</div>
+                
+                <!-- 今日の最新の輪郭カードコンテナ（背景を純白に、文字を濃い墨黒に引き締めてコントラスト化） -->
+                <div id="latest-card-container" class="bg-[#FFFFFF] border border-neutral-200/70 rounded-2xl p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.02)] relative transition-all hover:shadow-[0_4px_30px_rgba(0,0,0,0.05)] cursor-pointer" onclick="viewCardDetail(0)">
+                    <div class="absolute left-6 top-8 bottom-8 w-[1.2px] bg-amber-800/50"></div>
+                    <div class="pl-6 serif text-[15px] sm:text-[16px] text-neutral-800 leading-[1.8] font-light space-y-4">
+                        <p id="latest-card-text" class="font-medium text-neutral-900">褒められたいのではなく、<br>見つけてもらいたかった。</p>
+                        <p id="latest-card-sub" class="text-neutral-500 text-[13px] leading-[1.6]">あなたが求めていたのは評価よりも、<br>「ちゃんと見てもらえた」という実感なのかもしれません。</p>
+                        <!-- 背景のエッセイ冒頭プレビュー -->
+                        <p id="latest-card-preview" class="text-neutral-400 text-[11px] leading-[1.5] font-light font-mono truncate">私たちは日常の中で、無意識のうちに他者からの「評価」や「数字」を追い求めてしまうことがあります。仕事...</p>
+                    </div>
+                    <div class="text-right mt-6">
+                        <span class="text-xs text-neutral-500 underline underline-offset-4 tracking-wider hover:text-neutral-800 font-medium">→ 続きを読み、思索を深める</span>
+                    </div>
+                </div>
+
+                <!-- 今日の問いセクション -->
+                <div class="text-center pt-4 relative">
+                    <div class="flex justify-between items-center px-1 mb-2">
+                        <div class="w-4"></div> 
+                        <span class="serif text-[11.5px] tracking-widest text-neutral-500 font-medium">今日の問い</span>
+                        <!-- 問いを掛け替えるボタン -->
+                        <button onclick="shuffleQuestion()" class="text-neutral-300 hover:text-neutral-600 transition-colors p-1" title="別の問いをめくる">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4.5 h-4.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- 問いのテキスト：鉤括弧を廃止 -->
+                    <div id="question-text-container" class="min-h-[56px] flex items-center justify-center px-4 mb-6">
+                        <p id="today-question-text" class="text-[14.5px] text-neutral-850 font-medium leading-relaxed">誰にも否定されないなら何をしたいですか?</p>
+                    </div>
+                    
+                    <!-- 回答フォーム -->
+                    <div class="w-full bg-[#F3F1ED] border border-neutral-300/60 rounded-xl px-4 py-3.5 flex items-start space-x-3 mb-4 focus-within:border-neutral-500 transition-colors">
+                        <span class="text-neutral-500 mt-0.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 opacity-60">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 1.332-7.257 3 3 0 0 0-3.758-3.848 5.25 5.25 0 0 0-10.233 2.33A4.502 4.502 0 0 0 2.25 15Z" />
+                            </svg>
+                        </span>
+                        <textarea id="answer-input" rows="2" placeholder="ここに、あなたの言葉をそっと書き残してください..." class="bg-transparent border-none text-[13.5px] text-neutral-850 placeholder-neutral-400 focus:outline-none w-full font-light resize-none leading-relaxed"></textarea>
+                    </div>
+
+                    <!-- 回答を紡ぐボタン -->
+                    <button id="submit-answer-btn" onclick="submitAnswer()" class="border border-neutral-500 text-neutral-700 text-xs tracking-widest px-8 py-2.5 hover:bg-neutral-100/50 active:bg-neutral-150 transition-all font-medium rounded-sm mb-6">
+                        回答を紡ぐ
+                    </button>
+                </div>
+
+                <!-- 2カラムタイル（私の輪郭・気づきライブラリ） -->
+                <div class="grid grid-cols-2 gap-4 pt-6 border-t border-neutral-200/60">
+                    <div onclick="switchView('my-cards')" class="group border border-neutral-200/50 rounded-2xl p-5 bg-[#FFFFFF] hover:border-neutral-300 transition-all cursor-pointer flex flex-col justify-between min-h-[110px] shadow-[0_2px_10px_rgba(0,0,0,0.01)]">
+                        <span class="serif text-[13.5px] text-neutral-800 font-semibold tracking-widest">私の輪郭</span>
+                        <div class="self-end text-neutral-400 group-hover:text-neutral-850 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div onclick="switchView('library')" class="group border border-neutral-200/50 rounded-2xl p-5 bg-[#FFFFFF] hover:border-neutral-300 transition-all cursor-pointer flex flex-col justify-between min-h-[110px] shadow-[0_2px_10px_rgba(0,0,0,0.01)]">
+                        <span class="serif text-[13.5px] text-neutral-800 font-semibold tracking-widest">気づきライブラリ</span>
+                        <div class="self-end text-neutral-400 group-hover:text-neutral-850 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 他者の観察コンテナ -->
+                <div onclick="switchView('observations')" class="mt-6 border border-neutral-200/50 bg-[#FFFFFF] hover:border-neutral-300 rounded-2xl p-6 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_25px_rgba(0,0,0,0.03)] relative overflow-hidden group">
+                    <div class="absolute left-0 top-0 bottom-0 w-[3px] bg-neutral-300"></div>
+                    
+                    <div class="flex justify-between items-center mb-2 pl-2">
+                        <span class="serif text-[14.5px] text-neutral-850 tracking-widest font-semibold">他者の観察</span>
+                        <span class="text-[9px] tracking-widest text-neutral-500 font-medium border border-neutral-300 px-2.5 py-0.5 rounded-full">特別記述</span>
+                    </div>
+                    
+                    <p class="text-[12.5px] text-neutral-500 font-light leading-relaxed mb-4 pl-2">
+                        自分以外の瞳に映る、あなたの本当の姿。信頼できる誰かがそっと書き残した思索の記録（手紙）を、ここで受け取ります。
+                    </p>
+                    
+                    <div class="flex justify-end text-[11px] text-neutral-400 group-hover:text-neutral-800 transition-colors tracking-widest font-semibold">
+                        手紙をひも解く →
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 2. MY CARDS VIEW (私の輪郭 - カード一覧) -->
+            <div id="view-my-cards" class="view fade-in hidden space-y-6">
+                <div class="text-xs text-neutral-500 font-semibold tracking-widest mb-4">蓄積された、思索の痕跡</div>
+                <div id="cards-list" class="space-y-6 relative">
+                    <!-- 動的に生成されたカードリストが入ります -->
+                </div>
+            </div>
+
+            <!-- 3. CARD DETAIL VIEW (カード詳細 - 内省の余白) -->
+            <div id="view-card-detail" class="view fade-in hidden space-y-8">
+                <div class="text-xs tracking-widest text-neutral-500 font-medium mb-2" id="detail-date">2026.06.17</div>
+                
+                <!-- メインの詩的カード -->
+                <div class="bg-[#FCFCFC] border border-neutral-200/60 rounded-2xl p-8 shadow-[0_4px_30px_rgba(0,0,0,0.01)] relative">
+                    <div class="absolute left-6 top-8 bottom-8 w-[1px] bg-amber-800/40"></div>
+                    <div id="detail-card-text" class="pl-6 serif text-[16px] text-neutral-850 leading-[1.8] font-light space-y-6">
+                        <!-- ここにカード本文 -->
+                    </div>
+                </div>
+
+                <!-- 静かに語りかけるエッセイ -->
+                <div class="space-y-6 px-2">
+                    <h3 class="serif text-[13.5px] tracking-widest text-neutral-800 font-semibold border-b border-neutral-100 pb-2">内省の余白</h3>
+                    <div id="detail-essay-text" class="serif text-[14px] text-neutral-600 leading-[2.2] font-light space-y-8 tracking-wider">
+                        <!-- ここにエッセイ本文 -->
+                    </div>
+                </div>
+
+                <div class="pt-8 text-center border-t border-neutral-100 mt-12">
+                    <button onclick="goBack()" class="text-xs text-neutral-400 hover:text-neutral-800 tracking-widest transition-colors font-medium">
+                        ← 一覧へ戻る
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4. OBSERVATIONS VIEW (他者の観察) -->
+            <div id="view-observations" class="view fade-in hidden space-y-6">
+                
+                <!-- ご案内 -->
+                <div class="bg-[#FFFFFF] border border-neutral-200/60 rounded-2xl p-5 text-center space-y-2 shadow-sm">
+                    <p class="serif text-xs text-neutral-800 tracking-widest font-semibold">他者の瞳を借りて、自分の輪郭を知る</p>
+                    <p class="text-[12px] text-neutral-500 font-light leading-relaxed">
+                        信頼できる相手から届いた観察は、AIがそっと大切に受け止め、<br>
+                        あなたに寄り添う美しい「手紙」へと静かに調律して届けられます。
+                    </p>
+                </div>
+
+                <!-- タブ切り替え：送った観察を「あなたが残した手紙」に世界観を深化 -->
+                <div class="flex justify-center space-x-6 border-b border-neutral-200 pb-3 mb-4 pt-2">
+                    <button id="tab-obs-receive" onclick="switchObsTab('receive')" class="serif text-xs tracking-widest text-neutral-800 font-semibold border-b border-neutral-800 pb-1.5 transition-colors">受け取った観察</button>
+                    <button id="tab-obs-send" onclick="switchObsTab('send')" class="serif text-xs tracking-widest text-neutral-500 font-semibold hover:text-neutral-800 transition-colors">残した手紙</button>
+                </div>
+
+                <!-- 受け取った観察一覧 -->
+                <div id="obs-receive-list" class="space-y-4">
+                    <p class="text-xs text-neutral-400 font-light tracking-wide mb-2">AIの優しい瞳を通して再編された、大切な気づきの手紙です。</p>
+                    <div id="receive-observations-container" class="space-y-4">
+                        <!-- ここにAI調律済みの観察がレンダリングされます -->
+                    </div>
+                </div>
+
+                <!-- 送った観察一覧（残した手紙） -->
+                <div id="obs-send-list" class="space-y-4 hidden">
+                    <p class="text-xs text-neutral-400 font-light tracking-wide mb-2">あなたが他者へ贈った言葉の記録です。AIが相手を思って美しく整えてから届けています。</p>
+                    <div id="send-observations-container" class="space-y-4">
+                        <!-- 送信済みの記録が入ります -->
+                    </div>
+                    
+                    <!-- 新しく観察を送るボタン -->
+                    <div class="pt-4 text-center">
+                        <button onclick="openSendObsModal()" class="border border-neutral-300 text-neutral-500 text-xs tracking-widest px-6 py-2 hover:bg-neutral-50 active:bg-neutral-100 transition-colors font-light rounded-sm">
+                            新しく誰かを観察する
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. LIBRARY VIEW (気づきライブラリ) -->
+            <div id="view-library" class="view fade-in hidden space-y-6">
+                <div class="text-xs text-neutral-500 font-semibold tracking-widest mb-2">他者の気づきを借りて、自分を知る</div>
+                
+                <!-- 図書館タグ切り替え：「保存」を「栞を挟んだページ」に強化 -->
+                <div class="flex space-x-4 text-xs font-light tracking-wider border-b border-neutral-200 pb-3">
+                    <button id="lib-tab-recommend" onclick="switchLibTab('recommend')" class="text-neutral-800 font-semibold border-b border-neutral-800 pb-1">おすすめ</button>
+                    <button id="lib-tab-new" onclick="switchLibTab('new')" class="text-neutral-500 font-semibold hover:text-neutral-800">新着</button>
+                    <button id="lib-tab-bookmark" onclick="switchLibTab('bookmark')" class="text-neutral-500 font-semibold hover:text-neutral-800">栞を挟んだページ</button>
+                </div>
+
+                <!-- ライブラリカード一覧 -->
+                <div id="library-cards-container" class="space-y-6">
+                    <!-- 動的にライブラリ用のカードが並びます -->
+                </div>
+            </div>
+
+            <!-- 6. SETTINGS VIEW -->
+            <div id="view-settings" class="view fade-in hidden space-y-8">
+                <div class="text-xs text-neutral-500 font-semibold tracking-widest mb-4">静かな空間を整える</div>
+
+                <!-- ユーザープロフィール -->
+                <div class="flex items-center space-x-4 border-b border-neutral-100 pb-6">
+                    <div class="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-400 text-sm font-light">
+                        輪郭
+                    </div>
+                    <div>
+                        <div class="serif text-sm text-neutral-700 font-light">匿名の探求者</div>
+                        <div class="text-[11px] text-neutral-400 font-mono mt-1">ID: user_8f93a2bc81</div>
+                    </div>
+                </div>
+
+                <!-- 設定メニューリスト -->
+                <div class="space-y-5 text-sm font-light text-neutral-600">
+                    <div class="flex justify-between items-center py-2.5 border-b border-neutral-50 cursor-pointer hover:text-neutral-800">
+                        <span>通知設定</span>
+                        <span class="text-xs text-neutral-400">毎夜 21:00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2.5 border-b border-neutral-50 cursor-pointer hover:text-neutral-800">
+                        <span>公開設定</span>
+                        <span class="text-xs text-neutral-400">ライブラリへ匿名共有</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2.5 border-b border-neutral-50 cursor-pointer hover:text-neutral-800">
+                        <span>プライバシーポリシー</span>
+                        <span class="text-xs text-neutral-400">→</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2.5 border-b border-neutral-50 cursor-pointer hover:text-neutral-800">
+                        <span>利用規約</span>
+                        <span class="text-xs text-neutral-400">→</span>
+                    </div>
+                </div>
+
+                <div class="text-center pt-8 text-[11px] text-neutral-300 tracking-widest">
+                    watasinorinkaku.com v1.0.0
+                </div>
+            </div>
+
+        </main>
+
+        <!-- ================= MODALS & OVERLAYS ================= -->
+        <!-- 1. 静寂なAI生成中ローディング画面 -->
+        <div id="loading-overlay" class="absolute inset-0 bg-[#FCFCFC]/95 z-50 flex flex-col items-center justify-center space-y-6 hidden">
+            <div class="relative w-20 h-20 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border border-neutral-200 animate-ping opacity-25"></div>
+                <div class="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center">
+                    <span class="serif text-sm text-neutral-400 font-light">輪郭</span>
+                </div>
+            </div>
+            <div class="text-center space-y-2">
+                <div class="serif text-[14px] text-neutral-600 tracking-widest font-light animate-pulse" id="loading-text">届いた言葉を、そっと大切に受け止めています...</div>
+                <div class="text-[11px] text-neutral-400 font-light tracking-wider" id="loading-subtext">心に寄り添う美しい手紙を執筆中です（少々お待ちください）</div>
+            </div>
+        </div>
+
+        <!-- 2. 「他者への観察を送る」モーダル -->
+        <div id="obs-modal" class="absolute inset-0 bg-neutral-900/30 z-40 flex flex-col justify-end hidden" onclick="closeSendObsModal()">
+            <div class="bg-[#FCFCFC] rounded-t-[30px] p-6 space-y-6 pb-12 translate-y-full transition-transform duration-300" onclick="event.stopPropagation()">
+                <div class="w-10 h-1 bg-neutral-200 rounded-full mx-auto"></div>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <h3 class="serif text-[15px] text-neutral-850 font-semibold tracking-wider">他者の輪郭をそっと伝える</h3>
+                        <span class="text-[9.5px] bg-neutral-100 text-neutral-600 font-semibold px-2 py-0.5 rounded-full">言葉の調律</span>
+                    </div>
+                    <p class="text-xs text-neutral-400 font-light leading-relaxed">
+                        あなたが誰かについて気づいたことを、ここにそっと言葉にしてみてください。AIが言葉の奥にある魅力をやさしくすくい上げてお届けします。
+                    </p>
+                </div>
+                
+                <div class="space-y-4">
+                    <input type="text" id="obs-recipient" placeholder="誰に送りますか？（例：友人 A, 自分自身など）" class="w-full bg-[#F9F9F9] border border-neutral-200/60 rounded-xl px-4 py-3 text-sm font-light text-neutral-750 placeholder-neutral-400 focus:outline-none focus:border-neutral-450">
+                    <textarea id="obs-content" rows="4" placeholder="（例：いつも言葉少なだけど、さりげなく人を気遣える温かさがある / 少し頑固に見えるときもあるけれど、仕事にすごく誇りを持っているからだと思う…など）" class="w-full bg-[#F9F9F9] border border-neutral-200/60 rounded-xl px-4 py-3 text-sm font-light text-neutral-750 placeholder-neutral-400 focus:outline-none focus:border-neutral-450 resize-none leading-relaxed"></textarea>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button onclick="closeSendObsModal()" class="w-1/2 border border-neutral-300 text-neutral-600 text-xs tracking-widest py-3 font-semibold rounded-sm">閉じる</button>
+                    <button onclick="submitObservation()" class="w-1/2 bg-neutral-800 text-[#FCFCFC] text-xs tracking-widest py-3 font-semibold rounded-sm hover:bg-neutral-700 transition-colors">観察を届ける</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        // --- 状態管理 ---
+        let currentView = 'home';
+        let viewHistory = ['home'];
+        let obsTab = 'receive';
+        let libTab = 'recommend';
+
+        // 組み込まれた「今日の問い」データベース（全46個の美しい問い）
+        const questionsStock = [
+            { category: "輪郭らしい問い", text: "誰にも否定されないなら何をしたいですか？" },
+            { category: "輪郭らしい問い", text: "最近、自分のことを少し理解できた瞬間はありましたか？" },
+            { category: "輪郭らしい問い", text: "誰かに見つけてもらえたと感じた出来事は？" },
+            { category: "輪郭らしい問い", text: "あなたが本当に欲しかったものは何だったと思いますか？" },
+            { category: "輪郭らしい問い", text: "最近、誤解されていると感じたことは？" },
+            { category: "輪郭らしい問い", text: "最近、理解されたと感じたことは？" },
+            { category: "輪郭らしい問い", text: "あなたが無意識に大切にしているものは何だと思いますか？" },
+            { category: "輪郭らしい問い", text: "最近、心が動いた出来事は？" },
+            { category: "輪郭らしい問い", text: "あなたが何度も考えてしまうことは？" },
+            { category: "輪郭らしい問い", text: "最近、自分らしいと思った瞬間は？" },
+            { category: "輪郭らしい問い", text: "今のあなたを一言で表すなら？" },
+            
+            // 日常の気づき
+            { category: "日常の気づき", text: "最近、気づいたことはありますか？" },
+            { category: "日常の気づき", text: "今日一番印象に残った出来事は？" },
+            { category: "日常の気づき", text: "最近少し変わったと思うことは？" },
+            { category: "日常の気づき", text: "当たり前だと思っていたけれど、実はそうではなかったことは？" },
+            { category: "日常の気づき", text: "最近「なるほど」と思ったことは？" },
+
+            // 感情
+            { category: "感情", text: "最近嬉しかったことは？" },
+            { category: "感情", text: "最近悲しかったことは？" },
+            { category: "感情", text: "最近安心した瞬間は？" },
+            { category: "感情", text: "最近イライラした出来事は？" },
+            { category: "感情", text: "最近ほっとしたことは？" },
+            { category: "感情", text: "最近感動したことは？" },
+
+            // 人間関係
+            { category: "人間関係", text: "誰かに言われて嬉しかった言葉は？" },
+            { category: "人間関係", text: "誰かに言われて忘れられない言葉は？" },
+            { category: "人間関係", text: "最近感謝した人はいますか？" },
+            { category: "人間関係", text: "最近誰かを尊敬した瞬間は？" },
+            { category: "人間関係", text: "最近誰かに助けられたことは？" },
+            { category: "人間関係", text: "最近誰かを助けたことは？" },
+
+            // 自分
+            { category: "自分", text: "あなたらしいと思う行動は？" },
+            { category: "自分", text: "最近、自分を褒めたいことは？" },
+            { category: "自分", text: "最近、自分の意外な一面を見つけましたか？" },
+            { category: "自分", text: "子どもの頃から変わらない部分は？" },
+            { category: "自分", text: "今の自分に足りないと思うものは？" },
+            { category: "自分", text: "今の自分に十分あると思うものは？" },
+
+            // 過去
+            { category: "過去", text: "子どもの頃好きだったものは？" },
+            { category: "過去", text: "今でも覚えている出来事は？" },
+            { category: "過去", text: "あの頃の自分に声をかけるなら？" },
+            { category: "過去", text: "人生の転機だった出来事は？" },
+            { category: "過去", text: "忘れられない失敗は？" },
+
+            // 価値観
+            { category: "価値観", text: "お金より大事だと思うものは？" },
+            { category: "価値観", text: "あなたが守りたいものは？" },
+            { category: "価値観", text: "理解されたいと思うのはどんな時？" },
+            { category: "価値観", text: "許せないことは？" },
+            { category: "価値観", text: "大切にしている約束は？" },
+
+            // 他者視点
+            { category: "他者視点", text: "あなたはどんな人だと言われることが多いですか？" },
+            { category: "他者視点", text: "人からよく頼まれることは？" },
+            { category: "他者視点", text: "人から誤解されやすいことは？" },
+            { category: "他者視点", text: "人から褒められることは？" },
+            { category: "他者視点", text: "人から感謝されることは？" },
+
+            // もしも系
+            { category: "もしも系", text: "1年間自由な時間があったら何をしますか？" },
+            { category: "もしも系", text: "明日すべてがうまくいくとしたら何をしますか？" },
+            { category: "もしも系", text: "失敗しないとしたら挑戦したいことは？" },
+            { category: "未来の自分は今の自分に何と言うと思いますか？" }
+        ];
+        let currentQuestionIndex = 0; 
+
+        // 初期データ（改行 \n と 段落区切り線 --- を含んだ、5〜6行ごとの美しい段落レイアウト。文字数を半分〜2/3程度に短縮し内省余白を強化）
+        let cardsData = [
+            {
+                id: 1,
+                date: "2026.06.17",
+                card: "褒められたいのではなく、\n見つけてもらいたかった。\n\nあなたが求めていたのは評価よりも、\n「ちゃんと見てもらえた」という実感なのかもしれません。",
+                essay: "私たちは日常の中で、無意識のうちに他者からの「評価」や「数字」を追い求めてしまうことがあります。仕事での成績、SNSのリアクション、あるいは世間一般の『正しい生き方』にどれだけ適合できているかという、どこか他人事のような冷たい基準。それらは目に見えやすく、手軽に一時的な安心をくれる指標ですが、どれだけ多くの称賛を得て、人から羨望の眼差しを向けられたとしても、心の底にある乾きのようなものがどうしても消えない瞬間があります。\n\n---\n\nそれは、あなたが本当に欲していたものが、社会や誰かの定めた記号的な価値基準ではなく、もっと温かくてパーソナルなものだったからかもしれません。「よくやったね」という評価ではなく、「あなたがそこにいて、そのように感じていること」をただじっと、誰かに見届けてもらう体験。誰かに『ちゃんと見てもらえた』という実感は、まるで暗い海の中で、自分の名前を正確に呼ばれるような、静かで確かな光に似ています。\n\nあなたの弱さや、未完成な部分、葛藤も含めて、存在そのものを丸ごと相手の視野に入れてもらうこと。これこそが、他者の目を借りて自分の美しい輪郭を知るということです。あなたが求めていたのは、社会的な勝利ではなく、誰かの瞳の中に、歪みのない自分自身の影がそっと映り込むこと、それだけだったのかもしれません。"
+            },
+            {
+                id: 2,
+                date: "2026.06.12",
+                card: "夢中になることが、あなたの回復方法。\n\n休むとは、ただ何もしないことではなく、\n心が完全に奪われる美しい何かに深く浸ることです。",
+                essay: "多くの人々は「休息」という言葉を聞くと、ベッドに横たわって時間が過ぎるのをやり過ごす姿や、ただ静かに身体を止めて眠る時間を連想するでしょう。しかし、心が常にさまざまな情報や、未来への焦り、過去の未練でざわついている現代においては、身体を止めているだけでは魂の疲れを癒やすことはできません。何もしない空白の時間は、時として、余計な思考の迷路に自分を迷い込ませるきっかけになってしまうからです。\n\n---\n\nあなたにとっての本当の回復とは、「思考を無理に停止させること」ではなく、「何か一つのことに, 心のすべてを奪われる」という、極めて能動的な『没頭』のなかにあります。たとえば、本を読んでいるうちに時間の感覚が消え去ってしまったり、夢中で絵を描いているうちに部屋が暗くなっていたりするような、純粋で濃密な一瞬です。\n\nこのように自分の好きな世界に完全に『浸る』とき、私たちは一時的に「自分という個人的な悩みを持った存在」を忘れることができます。日常の役割や、他者からどう見されているかという不安、守らなければならない硬い輪郭をそっと脇に置いて、対象と自分とが溶け合う純粋な時間に身を委ねる。その熱中こそが、精神に最も深い静寂と栄養を与えてくれます。"
+            },
+            {
+                id: 3,
+                date: "2026.06.08",
+                card: "自由よりも、裁量を求めていた。\n\n縛りがないことではなく、自分の意思で選べる余白が、\nあなたを最も呼吸しやすくさせます。",
+                essay: "「自由」という言葉は、何者にも束縛されず、どこへでも行ける広大な荒野をイメージさせます。しかし、一切のルールや道標がない砂漠にぽつんと取り残されたとき、私たちはその無限 of 重さに耐えかねて不安に陥ってしまうことがあります。縛りのないことが、かえって動きを制限してしまう。あなたが真に心地よさを感じるのは、ルールや枠組みが無いことではなく、「その枠組みの中で、どう動き、どう創るか」を自分で決定できる『裁量』です。\n\n---\n\n何も決まっていない空間よりも、ある程度の輪郭線が存在し、その内側を自分の色彩で満たしていける自由。自分で選んだことだからこそ、責任を愛し、そのプロセスを心の底から楽しむことができるのです。それは仕事でも、日々の暮らしの過ごし方でも同じことかもしれません。縛りがないことを願うのではない、あなたの意思がそこに反映される余白があるかどうか。自分の足元にあるその小さな決定権を、そっと見つめ、慈しんであげてください。"
+            }
+        ];
+
+        // 匿名ライブラリ（栞を挟んでコレクションする気づきの一節）
+        let libraryData = [
+            { id: 101, date: "2026.06.16", card: "「正しいかどうか」より「愛せるかどうか」で選んだとき、\n心の中に確かな静けさが訪れた気がする。", isBookmarked: false },
+            { id: 102, date: "2026.06.14", card: "完璧な一日なんてないけれど、夕暮れの光が机を照らす一瞬だけで、\n『今日も良い日だった』と思えるしなやかさを持っていたい。", isBookmarked: false },
+            { id: 103, date: "2026.06.11", card: "自分の弱さを隠そうとするのをやめた時、周りの人の優しさが急に目に入ってきた。\n閉じていたのは世界ではなく、私自身だったのかもしれない。", isBookmarked: true },
+            { id: 104, date: "2026.06.09", card: "忙しさという盾を使って、本当に向き合うべき問いから、\nずっと逃げ続けていたことに気づいてしまった。", isBookmarked: false }
+        ];
+
+        // 受け取った他者の観察データ（誰が書いたか特定できないように関係性をぼかした表記へアップデート）
+        let receivedObservations = [
+            {
+                id: 201,
+                sender: "長く見てくれている人より",
+                date: "2026.06.10",
+                rawContent: "普段おとなしいのに、こないだの会議でめちゃくちゃ頑固に意見を通しててびっくりした。ちょっと怖かった。",
+                content: "あなたは一見すると周囲に優しく協調的な佇まいをしていますが、本当に大切にしたいアイデアや信念があるとき、周囲が驚くほど凛とした「強い意志（確かな芯）」を発揮できる人のようです。そのギャップは、周囲にとって非常に頼もしく、あなたの誠実さを物語っています。"
+            },
+            {
+                id: 202,
+                sender: "ある友人より",
+                date: "2026.06.02",
+                rawContent: "愚痴を全然言わなくて何考えてるかわからない。もっと適当に喋ればいいのに。",
+                content: "あなたは、誰かの言葉や日々の出来事を自分のなかで一度そっと噛み締め、本当に大切にしたいことだけを厳選して言葉にしようとする誠実さがあります。その沈黙は決して冷たさではなく、他者を傷つけないための優しい配慮なのかもしれません。"
+            }
+        ];
+
+        // 送った観察のデータ（あなたが誰かに渡した言葉の記録、残した手紙として設定）
+        let sentObservations = [
+            { recipient: "あなたをよく知る人へ", date: "2026.06.15", content: "何気ない瞬間に見せる、物事をじっと美しく見つめるあなたの眼差しが好きです。あなたの丁寧な生き方が、周りにも伝わっています。" }
+        ];
+
+        // --- Gemini API 連携の設定（気づき・解釈・余白を重視するプロンプト。文章量を現在の半分〜2/3（400〜600文字）に。答えを教えず余白を残す） ---
+        const systemPrompt = `
+        あなたは自己探求サービス『輪郭（りんかく）』の、思慮深く静かに語りかけるAIです。
+        ユーザーから「問いに対する回答」が送られます。その内容を深く受け止め、ユーザー自身の本当らしさへ気づくための静かなトリガーを提示してください。
+        
+        【重要：答えを与える分析家ではなく、考える余白を残すインタビュアーでいてください】
+
+        出力は必ず以下のJSONフォーマットにしてください。JSONのシンタックスが壊れないように、改行は「\\n」でエスケープしてください。：
+        {
+          "card": "3〜4行程度の、詩やメモのように読める短い気づき。改行(\\n)を最大2〜3回含めてください。【重要：読点『、』の直後や、単語の途中など、日本語として不自然な位置での改行は絶対にしないでください】。必ず文の終わり（『。』や『が』『けれど』など意味の大きな切れ目）でのみ自然に改行してください。気づき単体で美しい意味が伝わる密度にしてください。",
+          "essay": "長文の分析記事ではなく、気づき、解釈、余白を重視した、静かで客観的な散文エッセイ。【400文字以上、600文字以下】にしてください。1行ごとのバラバラな改行は絶対に行わず、3〜4文（5〜6行程度）で意味の通る美しい『段落（パラグラフ）』を構成し、段落と段落の間には必ず空行『\\n\\n』を入れてください。文章の途中に視覚的な息抜きとして、必ず単独の行として『\\n\\n---\\n\\n』(半角ダッシュ3つ)を1回挿入し、上品な区切り線を引いてください。断定を避け、そっと読者に考える余白を残すような優しい文体でお願いします。"
+        }
+        `;
+
+        // 【他者観察の調律プロンプト。関係性をぼかす指示を強めにする】
+        const observationFilterPrompt = `
+        あなたは自己探求サービス『輪郭』の「言葉の調停役」AIです。
+        他者から送られた、ユーザーに対する観察の言葉を、優しく客観的に整え直してください。
+
+        トゲや一方的な感情を完全に排除し、他者が感じた「ユーザーの本当の特徴や個性、愛すべき魅力」をやさしくすくい上げてください。
+        受け取った本人が静かに受け入れ、美しく内省の材料にできるような「客観的かつ温かい手紙のような言葉（3〜4行程度、100〜150字）」に要約・リライトしてください。
+
+        【重要ルール】：
+        - 読点「、」の直後や、単語の途中など、不自然な位置での改行は絶対に避けてください。自然な文節の終わりでのみ改行をしてください。
+
+        出力は必ず以下のJSONフォーマットにしてください：
+        {
+          "filteredContent": "磨き直された、傷つかない3〜4行の優しい気づきエッセイ"
+        }
+        `;
+
+        // 共通API呼出
+        async function callGeminiAPI(userQuery, sysPrompt, outputSchema) {
+            const apiKey = ""; 
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: sysPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: outputSchema
+                }
+            };
+
+            let delay = 1000;
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    return JSON.parse(text);
+                } catch (error) {
+                    if (i === 4) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // --- アプリの起動処理 ---
+        window.onload = function() {
+            const today = new Date();
+            const dateStr = today.getFullYear() + '.' + String(today.getMonth() + 1).padStart(2, '0') + '.' + String(today.getDate()).padStart(2, '0');
+            document.getElementById('home-date').innerText = dateStr;
+            
+            document.getElementById('today-question-text').innerText = `${questionsStock[currentQuestionIndex].text}`;
+            
+            updateLatestCardDisplay();
+            renderCardsList();
+            renderLibrary();
+            renderReceivedObservations();
+        }
+
+        // --- 問いの掛け替え（シャッフル）機能 ---
+        function shuffleQuestion() {
+            const textEl = document.getElementById('today-question-text');
+            
+            textEl.classList.add('fade-out-question');
+            
+            setTimeout(() => {
+                let nextIndex;
+                do {
+                    nextIndex = Math.floor(Math.random() * questionsStock.length);
+                } while (nextIndex === currentQuestionIndex); 
+                
+                currentQuestionIndex = nextIndex;
+                const newQuestionObj = questionsStock[currentQuestionIndex];
+                
+                // 問いの表示（鉤括弧を排除）
+                textEl.innerText = newQuestionObj.text;
+                
+                textEl.classList.remove('fade-out-question');
+                textEl.classList.add('fade-in-question');
+                
+                setTimeout(() => {
+                    textEl.classList.remove('fade-in-question');
+                }, 400);
+            }, 300);
+        }
+
+        // --- 画面ナビゲーション ---
+        function switchView(viewId) {
+            if (viewId === currentView) return;
+
+            document.querySelectorAll('.view').forEach(view => view.classList.add('hidden'));
+            
+            const nextView = document.getElementById(`view-${viewId}`);
+            if (nextView) {
+                nextView.classList.remove('hidden');
+                nextView.classList.add('fade-in');
+            }
+
+            // 履歴の更新
+            if (viewId === 'home') {
+                viewHistory = ['home'];
+            } else {
+                if (viewHistory[viewHistory.length - 1] !== viewId) {
+                    viewHistory.push(viewId);
+                }
+            }
+            currentView = viewId;
+
+            // ヘッダー表示のコントロール
+            const backBtn = document.getElementById('back-btn');
+            const logoEl = document.getElementById('header-logo');
+            const titleEl = document.getElementById('header-title');
+
+            if (viewId === 'home') {
+                backBtn.classList.add('hidden'); 
+                logoEl.classList.remove('hidden');
+                titleEl.classList.add('hidden');
+            } else {
+                backBtn.classList.remove('hidden'); 
+                logoEl.classList.add('hidden');
+                titleEl.classList.remove('hidden');
+            }
+
+            updateHeaderTitle(viewId);
+        }
+
+        function goBack() {
+            if (viewHistory.length <= 1) return;
+            viewHistory.pop(); 
+            const prevView = viewHistory[viewHistory.length - 1];
+            switchView(prevView);
+        }
+
+        function updateHeaderTitle(viewId) {
+            const titleEl = document.getElementById('header-title');
+            switch(viewId) {
+                case 'home':
+                    titleEl.innerText = '';
+                    break;
+                case 'my-cards':
+                    titleEl.innerText = '私の輪郭';
+                    break;
+                case 'card-detail':
+                    titleEl.innerText = '思索を深める';
+                    break;
+                case 'observations':
+                    titleEl.innerText = '他者の観察';
+                    break;
+                case 'library':
+                    titleEl.innerText = '気づきライブラリ';
+                    break;
+                case 'settings':
+                    titleEl.innerText = '設定';
+                    break;
+            }
+        }
+
+        // --- 今日の問いへの回答とAIカード生成 ---
+        async function submitAnswer() {
+            const inputEl = document.getElementById('answer-input');
+            const answerText = inputEl.value.trim();
+            if (!answerText) {
+                showToast("そっと、あなたの思いを言葉にしてみてください。");
+                return;
+            }
+
+            const overlay = document.getElementById('loading-overlay');
+            document.getElementById('loading-text').innerText = "届いた言葉を、そっと大切に受け止めています...";
+            document.getElementById('loading-subtext').innerText = "心に寄り添う美しい手紙を執筆中です（少々お待ちください）";
+            overlay.classList.remove('hidden');
+
+            try {
+                const currentQuestion = questionsStock[currentQuestionIndex].text;
+                const fullPrompt = `問い：${currentQuestion}\n回答：${answerText}`;
+                
+                const essaySchema = {
+                    type: "OBJECT",
+                    properties: {
+                        card: { type: "STRING" },
+                        essay: { type: "STRING" }
+                    },
+                    required: ["card", "essay"]
+                };
+
+                const response = await callGeminiAPI(fullPrompt, systemPrompt, essaySchema);
+                
+                const today = new Date();
+                const dateStr = today.getFullYear() + '.' + String(today.getMonth() + 1).padStart(2, '0') + '.' + String(today.getDate()).padStart(2, '0');
+                
+                const newCard = {
+                    id: Date.now(),
+                    date: dateStr,
+                    card: response.card,
+                    essay: response.essay
+                };
+
+                cardsData.unshift(newCard);
+
+                updateLatestCardDisplay();
+                renderCardsList();
+                inputEl.value = ""; 
+
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    viewCardDetailById(newCard.id);
+                }, 1500);
+
+            } catch (error) {
+                console.error(error);
+                overlay.classList.add('hidden');
+                showToast("静かな空間が一時的に途切れました。もう一度お試しください。");
+            }
+        }
+
+        function updateLatestCardDisplay() {
+            const latest = cardsData[0];
+            const textEl = document.getElementById('latest-card-text');
+            const subEl = document.getElementById('latest-card-sub');
+            const prevEl = document.getElementById('latest-card-preview');
+            
+            if (latest) {
+                textEl.innerHTML = latest.card.replace(/\n/g, '<br>');
+                subEl.innerHTML = latest.essay.substring(0, 50) + '...';
+                // 背景のエッセイ冒頭プレビューを自動取得
+                prevEl.innerHTML = latest.essay.replace(/\n/g, ' ').substring(0, 50) + '...';
+            }
+        }
+
+        // --- 私の輪郭：すべてのカード一覧のレンダリング ---
+        function renderCardsList() {
+            const listEl = document.getElementById('cards-list');
+            listEl.innerHTML = '';
+
+            cardsData.forEach((item, index) => {
+                const tilts = ['tilt-1', 'tilt-2', 'tilt-3'];
+                const tiltClass = tilts[index % tilts.length];
+
+                const cardHtml = `
+                    <div onclick="viewCardDetail(${index})" class="bg-[#FCFCFC] border border-neutral-100/80 p-6 rounded-xl shadow-[0_3px_15px_rgba(0,0,0,0.01)] relative cursor-pointer transition-all hover:scale-[1.01] hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] ${tiltClass}">
+                        <div class="text-[10px] tracking-widest text-neutral-400 font-light mb-3">${item.date}</div>
+                        <div class="serif text-[14px] text-neutral-700 leading-[1.7] font-light mb-4">
+                            ${item.card.replace(/\n/g, '<br>')}
+                        </div>
+                        <div class="flex justify-between items-center text-neutral-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                            </svg>
+                            <span class="text-[10px] tracking-widest text-neutral-400 hover:text-neutral-600 font-medium">深く読む →</span>
+                        </div>
+                    </div>
+                `;
+                listEl.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // --- 詳細（エッセイ）のパースと表示 ---
+        function setupDetailView(item) {
+            document.getElementById('detail-date').innerText = item.date;
+            document.getElementById('detail-card-text').innerHTML = item.card.replace(/\n/g, '<br>');
+            
+            const paragraphs = item.essay.split('\n\n');
+            const processedHtml = paragraphs.map(p => {
+                const trimmed = p.trim();
+                if (trimmed === '---') {
+                    return `<hr class="border-t border-neutral-100/70 my-10 w-12 mx-auto">`;
+                }
+                return `<p class="leading-[2.2] mb-6 text-justify font-light text-neutral-600 hover:text-neutral-800 transition-colors duration-300">${trimmed}</p>`;
+            }).join('');
+            
+            document.getElementById('detail-essay-text').innerHTML = processedHtml;
+            switchView('card-detail');
+        }
+
+        function viewCardDetail(index) {
+            const item = cardsData[index];
+            if (!item) return;
+            setupDetailView(item);
+        }
+
+        function viewCardDetailById(id) {
+            const item = cardsData.find(c => c.id === id);
+            if (!item) return;
+            setupDetailView(item);
+        }
+
+        // --- 観察タブの切り替え ---
+        function switchObsTab(tab) {
+            obsTab = tab;
+            const recTabBtn = document.getElementById('tab-obs-receive');
+            const sendTabBtn = document.getElementById('tab-obs-send');
+            const recList = document.getElementById('obs-receive-list');
+            const sendList = document.getElementById('obs-send-list');
+
+            if (tab === 'receive') {
+                recTabBtn.className = "serif text-xs tracking-widest text-neutral-800 font-semibold border-b border-neutral-800 pb-1.5 transition-colors";
+                sendTabBtn.className = "serif text-xs tracking-widest text-neutral-500 font-semibold hover:text-neutral-800 transition-colors";
+                recList.classList.remove('hidden');
+                sendList.classList.add('hidden');
+            } else {
+                sendTabBtn.className = "serif text-xs tracking-widest text-neutral-800 font-semibold border-b border-neutral-800 pb-1.5 transition-colors";
+                recTabBtn.className = "serif text-xs tracking-widest text-neutral-500 font-semibold hover:text-neutral-800 transition-colors";
+                sendList.classList.remove('hidden');
+                recList.classList.add('hidden');
+                renderSentObservations();
+            }
+        }
+
+        // 受け取った観察（手紙）のレンダリング
+        function renderReceivedObservations() {
+            const container = document.getElementById('receive-observations-container');
+            container.innerHTML = '';
+
+            receivedObservations.forEach(o => {
+                const cardHtml = `
+                    <div class="bg-[#FCFCFC] border border-neutral-100 p-5 rounded-2xl space-y-4 shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-shadow duration-300 relative">
+                        <div class="flex justify-between items-center text-[10px] text-neutral-400 font-light">
+                            <!-- 関係性をぼかした美しい差出人表記 -->
+                            <span class="font-medium text-neutral-500">${o.sender}</span>
+                            <span class="flex items-center space-x-1 text-neutral-300 font-light">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor" class="w-3.5 h-3.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.745 3.745 0 0 1 21 12Z" />
+                                </svg>
+                                <span>言葉の調律</span>
+                            </span>
+                        </div>
+                        <p class="serif text-[13.5px] text-neutral-600 leading-[1.9] font-light text-justify">
+                            ${o.content.replace(/\n/g, '<br>')}
+                        </p>
+                        <div class="text-right text-[10px] text-neutral-300 font-mono tracking-wider">${o.date}</div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // 他者の観察を送る（送信時にAI観察調律フィルターを実行）
+        async function submitObservation() {
+            const recipient = document.getElementById('obs-recipient').value.trim();
+            const rawContent = document.getElementById('obs-content').value.trim();
+            
+            if (!recipient || !rawContent) {
+                showToast("宛先と内容を優しく埋めてください。");
+                return;
+            }
+
+            closeSendObsModal();
+            const overlay = document.getElementById('loading-overlay');
+            document.getElementById('loading-text').innerText = "届いた言葉を、そっと大切に受け止めています...";
+            document.getElementById('loading-subtext').innerText = "心に寄り添う美しい手紙を執筆中です（少々お待ちください）";
+            overlay.classList.remove('hidden');
+
+            try {
+                // AI観察調律の実行
+                const filterSchema = {
+                    type: "OBJECT",
+                    properties: {
+                        filteredContent: { type: "STRING" }
+                    },
+                    required: ["filteredContent"]
+                };
+
+                const filterResult = await callGeminiAPI(rawContent, observationFilterPrompt, filterSchema);
+                const filteredContent = filterResult.filteredContent;
+
+                const today = new Date();
+                const dateStr = today.getFullYear() + '.' + String(today.getMonth() + 1).padStart(2, '0') + '.' + String(today.getDate()).padStart(2, '0');
+
+                // 1. 自分が送った生の言葉を記録に格納（送信履歴ではなく「残した手紙」として蓄積）
+                sentObservations.unshift({ 
+                    recipient, 
+                    date: dateStr, 
+                    content: rawContent 
+                });
+
+                // 2. デモシミュレーションとして、相手から自分への手紙としても調律結果を即時格納
+                receivedObservations.unshift({
+                    id: Date.now(),
+                    sender: `${recipient} より`,
+                    date: dateStr,
+                    rawContent: rawContent,
+                    content: filteredContent
+                });
+
+                renderSentObservations();
+                renderReceivedObservations();
+
+                document.getElementById('obs-recipient').value = "";
+                document.getElementById('obs-content').value = "";
+
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    switchObsTab('receive');
+                    showToast("調律された美しい観察レポートが、静かに届きました。");
+                }, 1500);
+
+            } catch (error) {
+                console.error(error);
+                overlay.classList.add('hidden');
+                showToast("言葉の調律中に一時的なノイズが発生しました。もう一度お試しください。");
+            }
+        }
+
+        // あなたが「残した手紙（他者へ贈った言葉の記録）」の表示
+        function renderSentObservations() {
+            const listEl = document.getElementById('send-observations-container');
+            listEl.innerHTML = '';
+            
+            sentObservations.forEach(o => {
+                const cardHtml = `
+                    <div class="bg-[#FAFAFA] border border-neutral-100 p-5 rounded-xl space-y-3">
+                        <div class="flex justify-between text-xs text-neutral-400">
+                            <span class="font-medium text-neutral-500">${o.recipient}</span>
+                            <span>${o.date}</span>
+                        </div>
+                        <p class="text-[13.5px] text-neutral-500 leading-relaxed font-light text-justify">${o.content}</p>
+                    </div>
+                `;
+                listEl.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // --- 気づきライブラリのレンダリングと機能 ---
+        function switchLibTab(tab) {
+            libTab = tab;
+            const tabs = ['recommend', 'new', 'bookmark'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`lib-tab-${t}`);
+                if (t === tab) {
+                    btn.className = "text-neutral-800 font-semibold border-b border-neutral-800 pb-1";
+                } else {
+                    btn.className = "text-neutral-500 font-semibold hover:text-neutral-800";
+                }
+            });
+            renderLibrary();
+        }
+
+        function renderLibrary() {
+            const container = document.getElementById('library-cards-container');
+            container.innerHTML = '';
+
+            let targetData = [];
+            if (libTab === 'recommend') {
+                targetData = libraryData.slice(0, 2); 
+            } else if (libTab === 'new') {
+                targetData = [...libraryData].reverse(); 
+            } else if (libTab === 'bookmark') {
+                targetData = libraryData.filter(item => item.isBookmarked); 
+            }
+
+            if (targetData.length === 0) {
+                container.innerHTML = `<div class="text-center py-12 text-xs text-neutral-400 font-light">ここに栞が挟まれた気づきはありません。</div>`;
+                return;
+            }
+
+            targetData.forEach(item => {
+                const isBookmarked = item.isBookmarked;
+                const cardHtml = `
+                    <div class="bg-[#FCFCFC] border border-neutral-100/60 p-6 rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.01)] space-y-4">
+                        <div class="flex justify-between items-center text-[10px] text-neutral-400 font-mono">
+                            <span>2026.06.17</span>
+                            <span>匿名の記述</span>
+                        </div>
+                        <p class="serif text-[14px] text-neutral-600 leading-[1.8] font-light">
+                            ${item.card.replace(/\n/g, '<br>')}
+                        </p>
+                        <div class="flex justify-between items-center pt-2 border-t border-neutral-50">
+                            <button onclick="reflectWithLibrary(${item.id})" class="text-[11px] text-neutral-400 hover:text-neutral-850 tracking-wider font-light flex items-center space-x-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                </svg>
+                                <span>この気づきから自分を省みる</span>
+                            </button>
+                            <!-- 栞ボタン：静かなコレクションとして表現 -->
+                            <button onclick="toggleBookmark(${item.id})" class="text-neutral-300 hover:text-amber-800/80 transition-colors" title="栞を挟む">
+                                ${isBookmarked ? `
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-4.5 h-4.5 text-amber-800/60">
+                                        <path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+                                    </svg>
+                                ` : `
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor" class="w-4.5 h-4.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+                                    </svg>
+                                `}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // 栞を挟む・外すトーストメッセージの調和
+        function toggleBookmark(id) {
+            const item = libraryData.find(i => i.id === id);
+            if (item) {
+                item.isBookmarked = !item.isBookmarked;
+                renderLibrary();
+                showToast(item.isBookmarked ? "静かにこのページへ栞を挟みました。" : "栞をそっと外しました。");
+            }
+        }
+
+        function reflectWithLibrary(id) {
+            const item = libraryData.find(i => i.id === id);
+            if (item) {
+                switchView('home');
+                const cleanText = item.card.split('\n')[0]; 
+                document.getElementById('answer-input').value = `「${cleanText}」という言葉に触れて、私は...`;
+                document.getElementById('answer-input').focus();
+                showToast("気づきをインスピレーションに、思索を開始します。");
+            }
+        }
+
+        // --- 簡易通知トースト ---
+        function showToast(message) {
+            const oldToast = document.querySelector('.toast-msg');
+            if (oldToast) oldToast.remove();
+
+            const toast = document.createElement('div');
+            toast.className = "toast-msg absolute bottom-12 left-6 right-6 bg-neutral-900/90 text-white text-xs font-light py-3 px-5 rounded-lg text-center tracking-wider z-50 fade-in";
+            toast.style.animationDuration = '0.3s';
+            toast.innerText = message;
+            
+            document.getElementById('app-container').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
